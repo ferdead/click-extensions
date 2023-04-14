@@ -1,3 +1,7 @@
+## 1.0.3
+
+- adicionado o formato para data RFC3339
+
 ## 1.0.2
 
 - ajustes
