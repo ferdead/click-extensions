@@ -27,6 +27,19 @@ extension StringExtension on String {
     }
   }
 
+  ///Retorna um bool [true/false] baseado na string true = [sim, true, 1, yes, y, s] ou retorna false
+  bool get toBool {
+    if (runtimeType == String) {
+      if (toLowerCase() == 'sim' ||
+          toLowerCase() == 'true' ||
+          toLowerCase() == '1' ||
+          toLowerCase() == 'yes' ||
+          toLowerCase() == 'y' ||
+          toLowerCase() == 's') return true;
+    }
+    return false;
+  }
+
   ///Transfoma uma *String* em *Num* .
   /// ```dart
   /// '1.234,56'.toCurrency -->  1234.56
@@ -40,8 +53,8 @@ extension StringExtension on String {
 
   ///Transfoma uma *String* em *DateTime?*.
   /// ```dart
-  /// '10/11/2023 14:22:15'.toDateBR -->  2023-11-10 00:00:00.000
-  /// '2023-11-10 14:22:15'.toDateBR -->  2023-11-10 00:00:00.000
+  /// '10/11/2023 14:22:15'.toDate -->  2023-11-10 00:00:00.000
+  /// '2023-11-10 14:22:15'.toDate -->  2023-11-10 00:00:00.000
   /// ```
   DateTime? get toDate {
     try {
@@ -54,6 +67,30 @@ extension StringExtension on String {
       return null;
     }
   }
+
+  ///Transfoma uma *String* em *DateTime?*.
+  /// ```dart
+  /// '10/11/2023 14:22:15'.toDateTime -->  2023-11-10 14:22:15.000
+  /// '2023-11-10 14:22:15'.toDateTime -->  2023-11-10 14:22:15.000
+  /// ```
+  DateTime? get toDateTime {
+    try {
+      var data = _formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL);
+      data = data.replaceAll('Z', '');
+      data = data.replaceAll('T', ' ');
+      var d = DateFormat(EnumDateTimeFormat.dateFullTimeFullINTL.value);
+      return d.parse(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  ///Formata uma *String* de data para data e hora completo padrão BR.
+  /// ```dart
+  ///'10/11/2023 14:22:15'.toDateTimeFullIntl -->  2023-11-10 14:22:15 | String
+  ///'2023-01-02 14:22:15'.toDateTimeFullIntl -->  2023-01-02 14:22:15 | String
+  /// ```
+  String get toDateTimeFullIntl => _formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL);
 
   ///Formata uma *String* de data para data e hora completo padrão BR.
   /// ```dart
@@ -103,6 +140,9 @@ extension StringExtension on String {
   ///'10/11/2023 14:22:15'.toTimeShortBR -->  14:22:15 | String
   /// ```
   String get toTimeFull => _formatDateTimeStr(this, EnumDateTimeFormat.timeFull);
+
+  ///Converte um DateTime em String formatando com o padrão RFC3339 (yyyy-mm-ddThh:mm:ssZ).
+  String get toRFC3339 => '${_formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL).replaceAll(' ', 'T')}Z';
 
   ///retorna uma *String* e deixa apenas os números dela.
   /// ```dart
@@ -193,6 +233,12 @@ extension DateTimeExtension on DateTime {
   ///Retorna um DateTime com o último dia da semana
   DateTime get lastDayOfWeek => add(Duration(days: DateTime.daysPerWeek - weekday));
 
+  ///Retorna um DateTime com o primeiro dia do mês
+  DateTime firstDayOfMonth() => DateTime(DateTime.now().year, DateTime.now().month, 1, 0, 0, 0);
+
+  ///Retorna um DateTime com o primeiro dia do mês informado no parâmetro
+  DateTime firstDayOfSpecificMonth(int month) => DateTime(DateTime.now().year, month, 1, 0, 0, 0);
+
   ///Retorna um DateTime com o último dia do mês
   DateTime get lastDayOfMonth => month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
 
@@ -208,8 +254,8 @@ extension DateTimeExtension on DateTime {
     return DateTime(parsedDate.year, parsedDate.month, parsedDate.day, 0, 0, 0);
   }
 
-  ///Retorna um DateTime com o primeiro dia do mês
-  DateTime firstDayOfMonth(int month) => DateTime(DateTime.now().year, month, 1, 0, 0, 0);
+  ///Converte um DateTime em String formatando com o padrão RFC3339 (yyyy-mm-ddThh:mm:ssZ).
+  String get toRFC3339 => '${_formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL).replaceAll(' ', 'T')}Z';
 
   ///Converte um DateTime em String formatando com a Data completa, padrão BR.
   String get toDateFullBR => _formatDateTime(this, EnumDateTimeFormat.dateFullBR);
@@ -221,7 +267,13 @@ extension DateTimeExtension on DateTime {
   String get toDateTimeFullBR => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullBR);
 
   ///Converte um DateTime em String formatando com a Data e hora completa, padrão Internacional.
-  String get toDateFullTimeFullIntl => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL);
+  String get toDateTimeFullIntl => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL);
+
+  String get toTimeShort => _formatDateTime(this, EnumDateTimeFormat.timeShort);
+
+  String get toTimeFull => _formatDateTime(this, EnumDateTimeFormat.timeFull);
+
+  String get formatDateTimeSql => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL);
 }
 
 String _formatDateTimeStr(String data, EnumDateTimeFormat formato) {
@@ -243,6 +295,7 @@ String _formatDateTime(DateTime dateTime, EnumDateTimeFormat formato) {
 }
 
 enum EnumDateTimeFormat {
+  rfc3339('yyyy-mm-ddTHH:mm:ssZ'),
   dateFullTimeFullBR('dd/MM/yyyy HH:mm:ss'),
   dateFullTimeShortBR('dd/MM/yyyy HH:mm'),
   dateShortTimeShortBR('dd/MM HH:mm'),

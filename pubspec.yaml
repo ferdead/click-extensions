@@ -1,6 +1,6 @@
 name: click_extensions
 description: Extensions para formatar dados
-version: 1.0.0
+version: 1.0.2
 repository: https://github.com/ferdead/click-extensions
 
 environment:

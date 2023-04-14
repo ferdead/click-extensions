@@ -8,7 +8,8 @@ void main() {
   print('DateTime.now().toDateFullBR -->  ${DateTime.now().toDateFullBR} | String');
   print('DateTime.now().toDateShortBR -->  ${DateTime.now().toDateShortBR} | String');
   print('DateTime.now().toDateTimeFullBR -->  ${DateTime.now().toDateTimeFullBR} | String');
-  print('DateTime.now().toDateFullTimeFullIntl -->  ${DateTime.now().toDateFullTimeFullIntl} | String');
+  print('DateTime.now().toDateTimeFullIntl -->  ${DateTime.now().toDateTimeFullIntl} | String');
+  print('DateTime.now().toRFC339 -->  ${DateTime.now().toRFC3339} | String');
 
   print('----------------------');
   print('EXTENSIONS STRING');
@@ -28,8 +29,8 @@ void main() {
   print('\'10/11/2023 14:22:15\'.toDateTimeShortBR -->  ${'10/11/2023 14:22:15'.toDateTimeShortBR} | String');
   print('\'2023-11-10 14:23:15\'.toDateShortBR -->  ${'2023-11-10 14:23:15'.toDateShortBR} | String');
   print('\'2023-11-10 14:22:15\'.toDateShortBR -->  ${'2023-11-10 14:22:15'.toDateShortBR} | String');
-  print('\'2023-11-10 14:22:15\'.toTimeShortBR -->  ${'2023-11-10 14:22:15'.toTimeShort} | String');
-  print('\'10/11/2023 14:22:15\'.toTimeShortBR -->  ${'10/11/2023 14:22:15'.toTimeShort} | String');
+  print('\'2023-11-10 14:22:15\'.toTimeShort -->  ${'2023-11-10 14:22:15'.toTimeShort} | String');
+  print('\'10/11/2023 14:22:15\'.toTimeShort -->  ${'10/11/2023 14:22:15'.toTimeShort} | String');
   print('\'2023-11-10 14:22:15\'.toTimeFull -->  ${'2023-11-10 14:22:15'.toTimeFull} | String');
   print('\'2023-11-10 14:22:15\'.toTimeFull -->  ${'2023-11-10 14:22:15'.toTimeShort} | String');
   print('\'1a2b3c\'.toOnlyNumber -->  ${'1a2b3c'.toOnlyNumber} | String');
