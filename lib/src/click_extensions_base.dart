@@ -279,6 +279,8 @@ extension DateTimeExtension on DateTime {
 String _formatDateTimeStr(String data, EnumDateTimeFormat formato) {
   DateTime dateTime;
 
+  data = data.replaceAll('T', ' ').replaceAll('Z', '');
+
   if (data.contains('/')) {
     dateTime = DateFormat('dd/MM/yyyy HH:mm:ss').parse(data);
   } else if (data.contains('-')) {

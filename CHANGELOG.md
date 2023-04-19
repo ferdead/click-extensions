@@ -1,3 +1,7 @@
+## 1.0.4
+
+- removendo o TZ da String com DateTime
+
 ## 1.0.3
 
 - adicionado o formato para data RFC3339
