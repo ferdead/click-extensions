@@ -1,3 +1,6 @@
+## 1.0.5
+- adicionado String toNum 
+
 ## 1.0.4
 
 - removendo o TZ da String com DateTime

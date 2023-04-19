@@ -144,6 +144,13 @@ extension StringExtension on String {
   ///Converte um DateTime em String formatando com o padrão RFC3339 (yyyy-mm-ddThh:mm:ssZ).
   String get toRFC3339 => '${_formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL).replaceAll(' ', 'T')}Z';
 
+  ///Converte uma String em um num
+  num get toNum {
+    var valor = this;
+    var v = NumberFormat.currency(locale: 'pt_BR');
+    return v.parse(valor);
+  }
+
   ///retorna uma *String* e deixa apenas os números dela.
   /// ```dart
   /// '2023-11-10 14:22:15'.toOnlyNumber -->  20231110142215
