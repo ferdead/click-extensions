@@ -36,4 +36,12 @@ void main() {
   print('\'1a2b3c\'.toOnlyNumber -->  ${'1a2b3c'.toOnlyNumber} | String');
   print('\'A Data 2023-11-10 14:22:15\'.toOnlyTexto -->  ${'A Data 2023-11-10 14:22:15'.toOnlyTexto} | String');
   print('\'áéíóú\'.toRetiraAcentos -->  ${'áéíóú'.toRetiraAcentos} | String');
+  print('\'47.5\'.isNumeric -->  ${'47.5'.isNumeric} | bool');
+  print('\'47,5\'.isNumeric -->  ${'47,5'.isNumeric} | bool');
+  print('\'47\'.isNumeric -->  ${'47'.isNumeric} | bool');
+  print('\'4a7\'.isNumeric -->  ${'4a7'.isNumeric} | bool');
+  print('\'123.000,12\'.toInt -->  ${'123.000,12'.toInt} | bool');
+  print('\'123,000.12\'.toInt -->  ${'123,000.12'.toInt} | bool');
+  print('\'47\'.toInt -->  ${'47'.toInt} | bool');
+  print('\'4a7\'.toInt -->  ${'4a7'.toInt} | bool');
 }

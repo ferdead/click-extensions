@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:click_functions_helper/click_functions_helper.dart';
 import 'package:intl/intl.dart';
@@ -145,10 +146,33 @@ extension StringExtension on String {
   String get toRFC3339 => '${_formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL).replaceAll(' ', 'T')}Z';
 
   ///Converte uma String em um num
-  num get toNum {
+  num? get toNum {
+    if (isNumeric == false) return null;
     var valor = this;
     var v = NumberFormat.currency(locale: 'pt_BR');
     return v.parse(valor);
+  }
+
+  int? get toInt {
+    //final a = NumberFormat.decimalPercentPattern(decimalDigits: 0, locale: 'pt_BR');
+    //return int.parse(a.parse(this).toString());
+    replaceAll('.', '');
+
+    return int.tryParse(toString());
+  }
+
+  double? get toDouble {
+    return double.tryParse(this);
+  }
+
+  ///Retorna se uma String é um número ou não:
+  ///'47.5'.isNumeric -->  true | bool
+  ///'47,5'.isNumeric -->  true | bool
+  ///'47'.isNumeric -->  true | bool
+  ///'4a7'.isNumeric -->  false | bool
+  bool get isNumeric {
+    final double? parseResult = double.tryParse(replaceAll('.', '').replaceAll(',', '.'));
+    return parseResult != null; // se parseResult não é nulo, significa que str é numérico
   }
 
   ///retorna uma *String* e deixa apenas os números dela.
@@ -324,5 +348,13 @@ enum EnumDateTimeFormat {
 
   static EnumDateTimeFormat fromInt(String value) {
     return values.firstWhere((t) => t.value == value);
+  }
+}
+
+extension ListExtension<T> on List<T> {
+  ///Esta função escolhe um item aleatório da lista e retorna um valor escolhido
+  T randomChoice() {
+    final random = Random();
+    return this[random.nextInt(length)];
   }
 }

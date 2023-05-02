@@ -1,3 +1,6 @@
+## 1.0.6
+- adicionado um extension de escolha aleatória de uma lista (.randomChoice)
+
 ## 1.0.5
 - adicionado String toNum 
 
