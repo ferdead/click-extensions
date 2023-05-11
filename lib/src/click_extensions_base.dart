@@ -5,6 +5,21 @@ import 'package:click_functions_helper/click_functions_helper.dart';
 import 'package:intl/intl.dart';
 
 extension StringExtension on String {
+  ///Verifica se a string contém um CPF válido
+  bool get isValidCPF => _validarCPF(this);
+
+  ///Verifica se a string contém um CNPJ válido
+  bool get isValidCNPJ => _validarCNPJ(this);
+
+  ///Verifica se a string contém um CPF ou CNPJ válido
+  bool get isValidCPForCNPJ => _validarCPF(this) || _validarCNPJ(this);
+
+  ///Faz o trim e deixa a string upper case
+  String get trimToUpper => trim().toUpperCase();
+
+  ///Faz o trim e deixa a string lower case
+  String get trimToLower => trim().toLowerCase();
+
   ///Transfoma uma *String* em *String* base 64.
   /// ```dart
   /// 'áéíóú'.toBase64 -->  w6HDqcOtw7PDug==
@@ -86,12 +101,19 @@ extension StringExtension on String {
     }
   }
 
-  ///Formata uma *String* de data para data e hora completo padrão BR.
+  ///Formata uma *String* de data para data e hora completo padrão Internacional.
   /// ```dart
   ///'10/11/2023 14:22:15'.toDateTimeFullIntl -->  2023-11-10 14:22:15 | String
   ///'2023-01-02 14:22:15'.toDateTimeFullIntl -->  2023-01-02 14:22:15 | String
   /// ```
   String get toDateTimeFullIntl => _formatDateTimeStr(this, EnumDateTimeFormat.dateFullTimeFullINTL);
+
+  ///Formata uma *String* de data para data completo padrão Internacional.
+  /// ```dart
+  ///'10/11/2023 14:22:15'.toDateTimeFullIntl -->  2023-11-10 | String
+  ///'2023-01-02 14:22:15'.toDateTimeFullIntl -->  2023-01-02 | String
+  /// ```
+  String get toDateFullIntl => _formatDateTimeStr(this, EnumDateTimeFormat.dateFullINTL);
 
   ///Formata uma *String* de data para data e hora completo padrão BR.
   /// ```dart
@@ -300,6 +322,9 @@ extension DateTimeExtension on DateTime {
   ///Converte um DateTime em String formatando com a Data e hora completa, padrão Internacional.
   String get toDateTimeFullIntl => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL);
 
+  ///Converte um DateTime em String formatando com a Data completa, padrão Internacional.
+  String get toDateFullIntl => _formatDateTime(this, EnumDateTimeFormat.dateFullINTL);
+
   String get toTimeShort => _formatDateTime(this, EnumDateTimeFormat.timeShort);
 
   String get toTimeFull => _formatDateTime(this, EnumDateTimeFormat.timeFull);
@@ -315,7 +340,11 @@ String _formatDateTimeStr(String data, EnumDateTimeFormat formato) {
   if (data.contains('/')) {
     dateTime = DateFormat('dd/MM/yyyy HH:mm:ss').parse(data);
   } else if (data.contains('-')) {
-    dateTime = DateFormat('yyyy-MM-dd HH:mm:ss').parse(data);
+    if (data.contains(':')) {
+      dateTime = DateFormat('yyyy-MM-dd HH:mm:ss').parse(data);
+    } else {
+      dateTime = DateFormat('yyyy-MM-dd').parse(data);
+    }
   } else {
     dateTime = DateFormat('yyyy/MM/dd HH:mm:ss').parse(data);
   }
@@ -356,5 +385,102 @@ extension ListExtension<T> on List<T> {
   T randomChoice() {
     final random = Random();
     return this[random.nextInt(length)];
+  }
+
+  String get toListString {
+    if (this is List<String>) {
+      final lista = join(', ');
+      return lista;
+    } else {
+      return 'toListString somente é permitido em uma lista de strings';
+    }
+  }
+}
+
+bool _validarCPF(String cpf) {
+  // Remove caracteres não numéricos do CPF
+  cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+
+  // Verifica se o CPF tem 11 dígitos
+  if (cpf.length != 11) {
+    return false;
+  }
+
+  // Verifica se todos os dígitos são iguais
+  if (RegExp(r'^(\d)\1*$').hasMatch(cpf)) {
+    return false;
+  }
+
+  // Calcula o primeiro dígito verificador
+  int soma = 0;
+  for (int i = 0; i < 9; i++) {
+    soma += int.parse(cpf[i]) * (10 - i);
+  }
+  int digito1 = 11 - (soma % 11);
+  if (digito1 > 9) {
+    digito1 = 0;
+  }
+
+  // Calcula o segundo dígito verificador
+  soma = 0;
+  for (int i = 0; i < 10; i++) {
+    soma += int.parse(cpf[i]) * (11 - i);
+  }
+  int digito2 = 11 - (soma % 11);
+  if (digito2 > 9) {
+    digito2 = 0;
+  }
+
+  // Verifica se os dígitos calculados são iguais aos dígitos do CPF
+  if (digito1 == int.parse(cpf[9]) && digito2 == int.parse(cpf[10])) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool _validarCNPJ(String cnpj) {
+  // Remove caracteres não numéricos do CNPJ
+  cnpj = cnpj.replaceAll(RegExp(r'[^0-9]'), '');
+
+  // Verifica se o CNPJ tem 14 dígitos
+  if (cnpj.length != 14) {
+    return false;
+  }
+
+  // Verifica se todos os dígitos são iguais
+  if (RegExp(r'^(\d)\1*$').hasMatch(cnpj)) {
+    return false;
+  }
+
+  // Calcula o primeiro dígito verificador
+  int soma = 0;
+  int peso = 2;
+  for (int i = 11; i >= 0; i--) {
+    soma += int.parse(cnpj[i]) * peso;
+    peso = (peso == 9) ? 2 : peso + 1;
+  }
+  int digito1 = 11 - (soma % 11);
+  if (digito1 > 9) {
+    digito1 = 0;
+  }
+
+  // Calcula o segundo dígito verificador
+  soma = 0;
+  peso = 2;
+  for (int i = 12; i >= 0; i--) {
+    soma += int.parse(cnpj[i]) * peso;
+    peso = (peso == 9) ? 2 : peso + 1;
+  }
+  int digito2 = 11 - (soma % 11);
+  if (digito2 > 9) {
+    digito2 = 0;
+  }
+
+  // Verifica se os dígitos calculados são iguais aos dígitos do CNPJ
+  if (digito1 == int.parse(cnpj[12]) && digito2 == int.parse(cnpj[13])) {
+    return true;
+  } else {
+    return false;
   }
 }

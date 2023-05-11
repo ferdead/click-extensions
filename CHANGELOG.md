@@ -1,3 +1,14 @@
+## 1.0.9
+- adicionado função de validar cpf
+- adicionado função de validar cnpj
+- adicionado função de validar cpf ou cnpj
+
+## 1.0.8
+- adicionado a extension de DataFullIntl no datetime
+
+## 1.0.7
+- adicionado a extension de DataFullIntl
+
 ## 1.0.6
 - adicionado um extension de escolha aleatória de uma lista (.randomChoice)
 

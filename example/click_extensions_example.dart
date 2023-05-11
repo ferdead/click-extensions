@@ -19,10 +19,21 @@ void main() {
   print('\'1.234,56\'.toCurrency -->  ${'1.234,56'.toCurrency} | Num');
   print('\'10/11/2023 14:22:15\'.toDate -->  ${'10/11/2023 14:22:15'.toDate} | DateTime?');
   print('\'2023-01-02 14:22:15\'.toDate -->  ${'2023-01-02 14:22:15'.toDate} | DateTime?');
+  print('\'2023-01-02\'.toDate -->  ${'2023-01-02'.toDate} | DateTime?');
+  print('\'10/11/2023 14:22:15\'.toDateTime -->  ${'10/11/2023 14:22:15'.toDateTime} | DateTime?');
+  print('\'2023-01-02\'.toDateTime -->  ${'2023-01-02'.toDateTime} | DateTime?');
   print('\'10/11/2023 14:22:15\'.toDateTimeFullBR -->  ${'10/11/2023 14:22:15'.toDateTimeFullBR} | String');
-  print('\'2023-01-02 14:22:15\'.toDateTimeFullBR -->  ${'2023-01-02 14:22:15'.toDateTimeFullBR} | String');
+  print('\'10/11/2023 14:22:16\'.toDateTimeFullBR -->  ${'10/11/2023 14:22:16'.toDateTimeFullBR} | String');
+  print('\'2023-01-02 14:22:17\'.toDateTimeFullBR -->  ${'2023-01-02 14:22:17'.toDateTimeFullBR} | String');
+  print('\'10/11/2023 14:22:15\'.toDateTimeFullIntl -->  ${'10/11/2023 14:22:15'.toDateTimeFullIntl} | String');
+  print('\'10/11/2023 14:22:16\'.toDateTimeFullIntl -->  ${'10/11/2023 14:22:16'.toDateTimeFullIntl} | String');
+  print('\'2023-01-02 14:22:17\'.toDateTimeFullIntl -->  ${'2023-01-02 14:22:17'.toDateTimeFullIntl} | String');
+  print('\'10/11/2023 14:22:15\'.toDateFullIntl -->  ${'10/11/2023 14:22:15'.toDateFullIntl} | String');
+  print('\'10/11/2023 14:22:16\'.toDateFullIntl -->  ${'10/11/2023 14:22:16'.toDateFullIntl} | String');
+  print('\'2023-01-02 14:22:17\'.toDateFullIntl -->  ${'2023-01-02 14:22:17'.toDateFullIntl} | String');
   print('\'10/11/2023 14:22:15\'.toDateFullTimeShortBR -->  ${'10/11/2023 14:22:15'.toDateFullTimeShortBR} | String');
-  print('\'2023-01-02 14:22:15\'.toDateFullTimeShortBR -->  ${'2023-01-02 14:22:15'.toDateFullTimeShortBR} | String');
+  print('\'10/11/2023 14:22:16\'.toDateFullTimeShortBR -->  ${'10/11/2023 14:22:16'.toDateFullTimeShortBR} | String');
+  print('\'2023-01-02 14:22:17\'.toDateFullTimeShortBR -->  ${'2023-01-02 14:22:17'.toDateFullTimeShortBR} | String');
   print('\'2023-11-10 14:22:15\'.toDateFullBR -->  ${'2023-11-10 14:22:15'.toDateFullBR} | String');
   print('\'10/11/2023 14:22:15\'.toDateFullBR -->  ${'10/11/2023 14:22:15'.toDateFullBR} | String');
   print('\'2023-11-10 14:22:15\'.toDateTimeShortBR -->  ${'2023-11-10 14:22:15'.toDateTimeShortBR} | String');
@@ -44,4 +55,9 @@ void main() {
   print('\'123,000.12\'.toInt -->  ${'123,000.12'.toInt} | bool');
   print('\'47\'.toInt -->  ${'47'.toInt} | bool');
   print('\'4a7\'.toInt -->  ${'4a7'.toInt} | bool');
+
+  print('----------------------');
+  print('EXTENSIONS LIST');
+  print('----------------------');
+  print('[\'abc\', \'def\', \'ghy\'].toListString --> ${['abc', 'def', 'ghy'].toListString} | String');
 }
