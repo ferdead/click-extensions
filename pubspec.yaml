@@ -4,11 +4,11 @@ version: 1.0.10
 repository: https://github.com/ferdead/click-extensions
 
 environment:
-  sdk: '>=2.18.0 <3.0.0'
+  sdk: '>=2.18.0 <3.1.0'
 
 dependencies:
   click_functions_helper: ^1.0.1
-  intl: ^0.17.0
+  intl: ^0.18.1
 
 
 dev_dependencies:

@@ -1,3 +1,5 @@
+## 1.0.10
+- alterado a versão do package intl: ^0.18.1
 ## 1.0.9
 - adicionado função de validar cpf
 - adicionado função de validar cnpj
