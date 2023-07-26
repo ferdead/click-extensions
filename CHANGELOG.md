@@ -1,3 +1,5 @@
+## 1.0.11
+- alterado a versão do package intl: ^0.18.0
 ## 1.0.10
 - alterado a versão do package intl: ^0.18.1
 ## 1.0.9
