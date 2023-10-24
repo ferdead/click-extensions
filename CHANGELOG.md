@@ -1,3 +1,10 @@
+## 1.0.12
+- nova string extension toCapitalize 
+- nova string extension toCamelCase 
+- nova string extension toSnackCase
+- nova string extension toPascalCase
+
+maiusculo
 ## 1.0.11
 - alterado a versão do package intl: ^0.18.0
 ## 1.0.10

@@ -245,6 +245,58 @@ extension StringExtension on String {
   String get toRetiraAcentos {
     return FunctionsHelper.retiraAcentos(this);
   }
+
+  ///Retorna uma String com o primeiro caractere maiúsculo
+  ///```dart
+  ///frase de exemplo -> Frase de exemplo
+  ///```
+  String get toCapitalize {
+    return this[0].toUpperCase() + substring(1);
+  }
+
+  ///Converte uma string em camel case
+  ///```dart
+  ///Exemplo: TesteDeString -> testeDeString
+  ///```
+  String toCamelCase() {
+    if (isEmpty) return this;
+
+    List<String> words = trim().split(RegExp(r'\s+|_+|-+'));
+    String result = words[0];
+
+    for (int i = 1; i < words.length; i++) {
+      result += words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
+    }
+
+    return result;
+  }
+
+  ///Converte uma string em pascal case
+  ///```dart
+  ///Exemplo: primeiroNomePessoa -> PrimeiroNomePessoa
+  ///```
+  String get toPascalCase {
+    return toCamelCase().toCapitalize;
+  }
+
+  ///Converte uma string em snack case
+  ///```dart
+  ///Exemplo: primeiroNomePessoa -> primeiro_nome_pessoa
+  ///```
+  String get toSnakeCase {
+    if (isEmpty) return this;
+
+    String result = this[0].toLowerCase();
+    for (int i = 1; i < length; i++) {
+      if (this[i] == this[i].toUpperCase()) {
+        result += '_${this[i].toLowerCase()}';
+      } else {
+        result += this[i];
+      }
+    }
+
+    return result;
+  }
 }
 
 extension NumExtension on num {
