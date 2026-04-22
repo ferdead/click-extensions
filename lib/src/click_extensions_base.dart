@@ -3,8 +3,62 @@ import 'dart:math';
 
 import 'package:click_functions_helper/click_functions_helper.dart';
 import 'package:intl/intl.dart';
+import 'package:mysql1/mysql1.dart';
+
+extension StringExtensionNullable on String? {
+  bool get isValidJson {
+    try {
+      if (this == null) return false;
+      final decoded = jsonDecode(this!);
+
+      // Opcional: garantir que seja Map ou List (JSON “raiz” válido)
+      return decoded is Map || decoded is List;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  ///verifica se a string é vazia ou nula
+  bool get isEmptyOrNull {
+    return this == null || this!.isEmpty;
+  }
+
+  bool get isDate {
+    if (this == null) return false;
+    List<String> formats = [
+      'dd/MM/yyyy',
+      'yyyy-MM-dd',
+      'dd/MM/yyyy HH:mm',
+      'yyyy-MM-dd HH:mm',
+      'dd/MM/yyyy HH:mm:ss',
+      'yyyy-MM-dd HH:mm:ss',
+    ];
+
+    for (var format in formats) {
+      try {
+        DateFormat formatter = DateFormat(format);
+        formatter.parseStrict(this!);
+        return true; // Se conseguiu fazer o parse sem exceções, retorna true
+      } catch (e) {
+        // Continua para o próximo formato se ocorrer erro
+      }
+    }
+    return false; // Se nenhum formato foi válido, retorna false
+  }
+}
 
 extension StringExtension on String {
+  bool get isValidJson {
+    try {
+      final decoded = jsonDecode(this);
+
+      // Opcional: garantir que seja Map ou List (JSON “raiz” válido)
+      return decoded is Map || decoded is List;
+    } catch (e) {
+      return false;
+    }
+  }
+
   ///Verifica se a string contém um CPF válido
   bool get isValidCPF => _validarCPF(this);
 
@@ -46,14 +100,15 @@ extension StringExtension on String {
   ///Retorna um bool [true/false] baseado na string true = [sim, true, 1, yes, y, s] ou retorna false
   bool get toBool {
     if (runtimeType == String) {
-      if (toLowerCase() == 'sim' ||
-          toLowerCase() == 'true' ||
-          toLowerCase() == '1' ||
-          toLowerCase() == 'yes' ||
-          toLowerCase() == 'y' ||
-          toLowerCase() == 's') return true;
+      if (toLowerCase() == 'sim' || toLowerCase() == 'true' || toLowerCase() == '1' || toLowerCase() == 'yes' || toLowerCase() == 'y' || toLowerCase() == 's') return true;
     }
     return false;
+  }
+
+  ///Retorna um blob convertendo a String
+  Blob get toBlob {
+    List<int> bytes = utf8.encode(this);
+    return Blob.fromBytes(bytes);
   }
 
   ///Transfoma uma *String* em *Num* .
@@ -74,7 +129,13 @@ extension StringExtension on String {
   /// ```
   DateTime? get toDate {
     try {
-      var data = _formatDateTimeStr(this, EnumDateTimeFormat.dateFullBR);
+      String data = '';
+      if (contains(':')) {
+        data = _formatDateTimeStr(this, EnumDateTimeFormat.dateFullBR);
+      } else {
+        data = _formatDateTimeStr('$this 00:00:00', EnumDateTimeFormat.dateFullBR);
+      }
+
       data = data.replaceAll('Z', '');
       data = data.replaceAll('T', ' ');
       var d = DateFormat(EnumDateTimeFormat.dateFullBR.value);
@@ -187,6 +248,26 @@ extension StringExtension on String {
     return double.tryParse(this);
   }
 
+  ///Função para converter uma string em um double com correção de flutuação de 2 casas decimais
+  double? get toDouble2 {
+    final parsedValue = double.tryParse(this);
+    if (parsedValue != null) {
+      // Aqui, arredondamos o valor para 2 casas decimais para evitar flutuações
+      return double.parse(parsedValue.toStringAsFixed(2));
+    }
+    return null;
+  }
+
+  ///Função para converter uma string em um double com correção de flutuação de 3 casas decimais
+  double? get toDouble3 {
+    final parsedValue = double.tryParse(this);
+    if (parsedValue != null) {
+      // Aqui, arredondamos o valor para 3 casas decimais para evitar flutuações
+      return double.parse(parsedValue.toStringAsFixed(3));
+    }
+    return null;
+  }
+
   ///Retorna se uma String é um número ou não:
   ///'47.5'.isNumeric -->  true | bool
   ///'47,5'.isNumeric -->  true | bool
@@ -297,6 +378,153 @@ extension StringExtension on String {
 
     return result;
   }
+
+  ///formata string para telefone:
+  ///'24-3371-19-44' => (24) 3371-1944;
+  ///'24999991944'   => (24) 99999-1944;
+  String get toFone {
+    String numeros = replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Verifica se o número tem o comprimento de um telefone fixo ou celular
+    if (numeros.length == 10) {
+      // Formato de telefone fixo (XX) XXXX-XXXX
+      return '(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}';
+    } else if (numeros.length == 11) {
+      // Formato de celular (XX) XXXXX-XXXX
+      return '(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7)}';
+    } else {
+      // Retorna a string original se não corresponder aos formatos esperados
+      return numeros;
+    }
+  }
+
+  ///formatar uma string para CPF ou CNPJ
+  /// '12345678901'.toCpfCnpj => '123.456.789-01';
+  /// '12345678000199'.toCpfCnpj => '12.345.678/0001-99';
+  String get toCpfCnpj {
+    // Remove caracteres não numéricos
+    String numeros = replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Formata como CPF (XXX.XXX.XXX-XX)
+    if (numeros.length == 11) {
+      return '${numeros.substring(0, 3)}.${numeros.substring(3, 6)}.${numeros.substring(6, 9)}-${numeros.substring(9, 11)}';
+    }
+    // Formata como CNPJ (XX.XXX.XXX/XXXX-XX)
+    else if (numeros.length == 14) {
+      return '${numeros.substring(0, 2)}.${numeros.substring(2, 5)}.${numeros.substring(5, 8)}/${numeros.substring(8, 12)}-${numeros.substring(12, 14)}';
+    } else {
+      // Retorna a string original se não corresponder aos formatos esperados
+      return numeros;
+    }
+  }
+
+  ///Converte uma String chave:valor para um mapa String, dynamic
+  Map<String, dynamic> get parseToMap {
+    Map<String, dynamic> resultMap = {};
+
+    // Divide a entrada em linhas
+    List<String> lines = split('\n');
+
+    for (String line in lines) {
+      if (line.trim().isEmpty) {
+        continue;
+      }
+
+      // Divide cada linha pelo primeiro ':'
+      int idx = line.indexOf(':');
+      if (idx != -1) {
+        String key = line.substring(0, idx).trim();
+        dynamic value = line.substring(idx + 1).trim();
+
+        // Tenta converter o valor para um número, se possível
+        if (int.tryParse(value) != null) {
+          value = int.parse(value);
+        }
+
+        resultMap[key] = value;
+      }
+    }
+
+    return resultMap;
+  }
+
+  ///checa se a data é valida
+  bool get isDate {
+    List<String> formats = [
+      'dd/MM/yyyy',
+      'yyyy-MM-dd',
+      'dd/MM/yyyy HH:mm',
+      'yyyy-MM-dd HH:mm',
+      'dd/MM/yyyy HH:mm:ss',
+      'yyyy-MM-dd HH:mm:ss',
+    ];
+
+    for (var format in formats) {
+      try {
+        DateFormat formatter = DateFormat(format);
+        formatter.parseStrict(this);
+        return true; // Se conseguiu fazer o parse sem exceções, retorna true
+      } catch (e) {
+        // Continua para o próximo formato se ocorrer erro
+      }
+    }
+    return false; // Se nenhum formato foi válido, retorna false
+  }
+
+  ///Altera a String com textos e quebra de lina para Maiúsculo no inicio da sentença
+  ///Ex. O RATO ROEU A ROUPA DO REI DE ROMA -> O rato roeu a roupa do rei de roma
+  String get toCapitalizeText {
+    // Divide o texto primeiro pelas quebras de linha
+    List<String> lines = split('\n');
+
+    // Processa linha por linha, capitalizando corretamente as frases
+    List<String> formattedLines = lines.map((line) {
+      // Divide a linha em frases com base em ponto final, exclamação ou interrogação
+      List<String> sentences = line.split(RegExp(r'(?<=[.!?/])\s+'));
+
+      // Capitaliza cada sentença
+      List<String> formattedSentences = sentences.map((sentence) {
+        if (sentence.isEmpty) return sentence;
+        return sentence[0].toUpperCase() + sentence.substring(1).toLowerCase();
+      }).toList();
+
+      // Junta as sentenças novamente com o espaço necessário
+      return formattedSentences.join(' ');
+    }).toList();
+
+    // Junta todas as linhas novamente, preservando as quebras de linha
+    return formattedLines.join('\n');
+  }
+
+  /// Capitaliza o título levando em consideração preposições e conjunções comuns
+  String get toCapitalizeTitle {
+    // Lista de palavras que não devem ser capitalizadas, exceto se forem a primeira palavra
+    final List<String> exceptions = ['de', 'do', 'da', 'dos', 'das', 'para', 'e', 'com', 'sem', 'por', 'a', 'o', 'as', 'os', 'ml', 'kg', 'g', 'un', 'l'];
+
+    // Converte o texto para minúsculo, separa em palavras e processa cada uma
+    List<String> words = toLowerCase().split(' ').where((word) => word.isNotEmpty).map((word) {
+      // Se a palavra não estiver na lista de exceções, capitaliza a primeira letra
+      if (!exceptions.contains(word)) {
+        return word[0].toUpperCase() + word.substring(1);
+      }
+      return word;
+    }).toList();
+
+    // Garante que a primeira palavra seja capitalizada, mesmo que esteja na lista de exceções
+    if (words.isNotEmpty) {
+      words[0] = words[0][0].toUpperCase() + words[0].substring(1);
+    }
+
+    // Junta as palavras novamente em uma string
+    return words.join(' ');
+  }
+}
+
+extension NumExtensionNullable on num? {
+  ///verifica se a string é vazia ou nula
+  bool get isEmptyOrNull {
+    return this == null || this == 0;
+  }
 }
 
 extension NumExtension on num {
@@ -331,6 +559,89 @@ extension NumExtension on num {
   }
 }
 
+extension DoubleExtension on double {
+  ///formata um Num retornando uma string no formato de moeda brasileiro
+  String get toFormattedMoney {
+    final valor = this;
+    var v = NumberFormat.currency(locale: 'pt_BR', decimalDigits: 2, symbol: 'R\$');
+    return v.format(valor);
+  }
+
+  ///formata um Num retornando uma string no com duas casas decimais padrão BR
+  String get toDecimal2Br {
+    final valor = this;
+    var v = NumberFormat.currency(customPattern: '##,##0.00', locale: 'pt_BR');
+    return v.format(valor);
+  }
+
+  String toDecimalBr(int decimalDigits) {
+    final valor = this;
+    var v = NumberFormat.currency(customPattern: '##,##0.00', locale: 'pt_BR', decimalDigits: decimalDigits);
+    return v.format(valor);
+  }
+
+  ///retorna um Num com duas casas decimais padrão US
+  num get toDecimal2Us {
+    final valor = this;
+    var v = NumberFormat.currency(customPattern: '0.00', locale: 'en_US');
+    return num.parse(v.format(valor));
+  }
+
+  num get toDecimal2UsTruncate {
+    final valor = this;
+    return (valor * 100).floor() / 100;
+  }
+
+  double arredondarComPrecisao(int precisao) {
+    int fator = pow(10, precisao) as int;
+    return (this * fator).round() / fator;
+  }
+
+  ///trunca um num com precisão informada no parâmetro
+  num toTruncate(int precision) {
+    final valor = this;
+    var strValor = valor.toStringAsFixed(precision + 10);
+    final s = strValor.split('.');
+    strValor = '${s[0]}.${s[1].substring(0, precision)}';
+    return num.parse(strValor);
+  }
+
+  /// retorna um double com duas casas decimais, arredondando 0.5 para cima.
+  double get toDouble2 {
+    return _roundHalfUp(2);
+  }
+
+  /// retorna um double com três casas decimais, arredondando 0.5 para cima.
+  double get toDouble3 {
+    return _roundHalfUp(3);
+  }
+
+  // ///retorna um double com duas casas decimais
+  // double get toDouble2 {
+  //   return double.parse(toStringAsFixed(2));
+  // }
+
+  // ///retorna um double com três casas decimais
+  // double get toDouble3 {
+  //   return double.parse(toStringAsFixed(3));
+  // }
+
+  /// Internal helper to round a double to a specified number of decimal places
+  /// using "round half up" logic.
+  /// (e.g., 0.5 rounds up, 0.4 rounds down)
+  double _roundHalfUp(int decimalPlaces) {
+    if (decimalPlaces < 0) {
+      throw ArgumentError('decimalPlaces must be non-negative');
+    }
+    if (decimalPlaces == 0) {
+      return roundToDouble();
+    }
+    final factor = pow(10, decimalPlaces).toDouble();
+    // Multiply by factor, round, then divide by factor
+    return (this * factor).round() / factor;
+  }
+}
+
 extension DateTimeExtension on DateTime {
   ///Retorna um DateTime com o primeiro dia da semana
   DateTime get firstDayOfWeek => subtract(Duration(days: weekday - 1));
@@ -359,6 +670,30 @@ extension DateTimeExtension on DateTime {
     return DateTime(parsedDate.year, parsedDate.month, parsedDate.day, 0, 0, 0);
   }
 
+  ///Adiciona o número de mes a uma data
+  DateTime addMonth(int meses) {
+    int novoMes = (month + meses) % 12;
+    int novoAno = year + ((month + meses) ~/ 12);
+    int novoDia = day;
+
+    // Lida com o caso em que o dia é maior do que o último dia do novo mês
+    if (novoDia > DateTime(novoAno, novoMes + 1, 0).day) {
+      novoDia = DateTime(novoAno, novoMes + 1, 0).day;
+    }
+
+    return DateTime(novoAno, novoMes, novoDia, hour, minute, second, millisecond, microsecond);
+  }
+
+  ///Retorna um DateTime com UTC e altera as horas do fuso-horário
+  DateTime toUtcFuso([int fuso = -3]) {
+    //if (isUtc) return this;
+    //add(timeZoneOffset);
+    //return toUtc().add(Duration(hours: fuso));
+
+    if (isUtc) return this;
+    return DateTime.utc(year, month, day, hour, minute, second);
+  }
+
   ///Converte um DateTime em String formatando com o padrão RFC3339 (yyyy-mm-ddThh:mm:ssZ).
   String get toRFC3339 => '${_formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL).replaceAll(' ', 'T')}Z';
 
@@ -382,6 +717,44 @@ extension DateTimeExtension on DateTime {
   String get toTimeFull => _formatDateTime(this, EnumDateTimeFormat.timeFull);
 
   String get formatDateTimeSql => _formatDateTime(this, EnumDateTimeFormat.dateFullTimeFullINTL);
+
+  ///Converte um DateTime em String no formato: 07 de março de 2024
+  String get toLongDate {
+    return '${day.toString().padLeft(2, '0')} de ${EnumMeses.fromMes(month).nomeCompleto} de $year';
+  }
+
+  ///Escreve a data no formato de nome do mês/ano EX. AGOSTO/2024
+  String get toMesAnoDescrito {
+    const months = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+
+    String monthName = months[month - 1];
+    return '$monthName/$year';
+  }
+}
+
+enum EnumMeses {
+  janeiro(1, 'janeiro', 'jan'),
+  fevereiro(2, 'fevereiro', 'fev'),
+  marco(3, 'março', 'mar'),
+  abril(4, 'abril', 'abr'),
+  maio(5, 'maio', 'mai'),
+  junho(6, 'junho', 'jun'),
+  julho(7, 'julho', 'jul'),
+  agosto(8, 'agosto', 'ago'),
+  setembro(9, 'setembro', 'set'),
+  outubro(10, 'outubro', 'out'),
+  novembro(11, 'novembro', 'nov'),
+  dezembro(12, 'dezembro', 'dec');
+
+  const EnumMeses(this.numero, this.nomeCompleto, this.nomeAbreviado);
+
+  final int numero;
+  final String nomeCompleto;
+  final String nomeAbreviado;
+
+  static EnumMeses fromMes(int numero) {
+    return values.firstWhere((t) => t.numero == numero);
+  }
 }
 
 String _formatDateTimeStr(String data, EnumDateTimeFormat formato) {
@@ -535,4 +908,9 @@ bool _validarCNPJ(String cnpj) {
   } else {
     return false;
   }
+}
+
+extension BlobExtension on Blob {
+  ///converter blob do mysql para string
+  String get toStr => utf8.decode((this).toBytes());
 }
