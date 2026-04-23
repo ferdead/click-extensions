@@ -1,13 +1,15 @@
 name: click_extensions
 description: Extensions para formatar dados
-version: 1.0.49
+version: 1.0.51
 repository: https://github.com/ferdead/click-extensions
 
 environment:
   sdk: '>=2.18.0 <4.0.0'
 
 dependencies:
-  click_functions_helper: ^1.0.2
+#  flutter:
+#    sdk: flutter
+  click_functions_helper: ^1.0.32
   intl: ^0.20.2
   mysql1: ^0.20.0
 

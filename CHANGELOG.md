@@ -1,3 +1,11 @@
+## 1.0.51
+- compilação sem flutter sdk
+
+## 1.0.50
+- compatibilidade com click_functions_helper 1.0.31
+- troca de `FunctionsHelper` para `ClickFunctionsHelper`
+- adiciona `flutter` sdk dependency no package
+
 ## 1.0.49
 - intl versão 0.20.2
 ## 1.0.48

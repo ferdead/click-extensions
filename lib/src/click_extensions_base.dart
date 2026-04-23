@@ -283,7 +283,7 @@ extension StringExtension on String {
   /// '2023-11-10 14:22:15'.toOnlyNumber -->  20231110142215
   /// ```
   String get toOnlyNumber {
-    return FunctionsHelper.onlyNumbers(this);
+    return ClickFunctionsHelper.onlyNumbers(this);
   }
 
   ///Retorna uma string com apenas textos retirando os caracteres especiais
@@ -324,7 +324,7 @@ extension StringExtension on String {
   ///'áéíóú'.toRetiraAcentos -->  aeiou | String
   ///```
   String get toRetiraAcentos {
-    return FunctionsHelper.retiraAcentos(this);
+    return ClickFunctionsHelper.retiraAcentos(this);
   }
 
   ///Retorna uma String com o primeiro caractere maiúsculo
